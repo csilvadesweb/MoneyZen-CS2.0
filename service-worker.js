@@ -1,37 +1,70 @@
-const CACHE_NAME = "moneyzen-pwa-v3";
+/* =====================================================
+   MoneyZen CS - Service Worker Oficial
+   © C.Silva - Uso Proprietário
+   ===================================================== */
 
-const FILES = [
+const CACHE_NAME = "moneyzen-cs-v1.0.0";
+
+const FILES_TO_CACHE = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./privacy.html",
+
+  "./icons/icon-72.png",
+  "./icons/icon-96.png",
+  "./icons/icon-128.png",
+  "./icons/icon-144.png",
+  "./icons/icon-152.png",
+  "./icons/icon-192.png",
+  "./icons/icon-384.png",
+  "./icons/icon-512.png"
 ];
 
-self.addEventListener("install", event => {
-  self.skipWaiting();
+/* =====================
+   INSTALL
+===================== */
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(FILES_TO_CACHE);
+    })
   );
+  self.skipWaiting();
 });
 
-self.addEventListener("activate", event => {
+/* =====================
+   ACTIVATE
+===================== */
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
+    caches.keys().then((keys) =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
       )
     )
   );
   self.clients.claim();
 });
 
-self.addEventListener("fetch", event => {
+/* =====================
+   FETCH
+===================== */
+self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
+    caches.match(event.request).then((response) => {
+      return (
+        response ||
+        fetch(event.request).then((fetchResponse) => {
+          return fetchResponse;
+        })
+      );
     })
   );
 });
