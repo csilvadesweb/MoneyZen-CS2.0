@@ -1,86 +1,120 @@
-let data = JSON.parse(localStorage.getItem("moneyzen")) || [];
-let chart;
+/* ========= BLINDAGEM ========= */
+document.addEventListener("keydown", e => {
+  if (e.ctrlKey && ["u","s","c","x","a"].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+  }
+});
 
-const ctx = document.getElementById("chart").getContext("2d");
+/* ========= DADOS ========= */
+let transactions = JSON.parse(localStorage.getItem("moneyzen")) || [];
+let theme = localStorage.getItem("theme") || "dark";
 
+if (theme === "light") document.body.classList.add("light");
+
+/* ========= FUNÇÕES ========= */
 function save() {
-  localStorage.setItem("moneyzen", JSON.stringify(data));
+  localStorage.setItem("moneyzen", JSON.stringify(transactions));
 }
 
-function addEntry() {
-  if (!desc.value || !value.value) return;
-
-  data.push({
-    date: date.value,
-    desc: desc.value,
-    value: Number(value.value),
-    type: type.value,
-    category: category.value
-  });
-
-  desc.value = "";
-  value.value = "";
-
-  save();
-  render();
+function format(v) {
+  return v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 }
 
-function render() {
+function update() {
+  const history = document.getElementById("history");
   history.innerHTML = "";
-  let income = 0, expense = 0;
 
-  data.forEach(e => {
+  let income = 0;
+  let expense = 0;
+
+  transactions.forEach(t => {
     const li = document.createElement("li");
-    li.textContent = `${e.date} | ${e.desc} | ${e.category} | R$ ${e.value}`;
+    li.textContent = `${t.description} - ${format(t.amount)}`;
     history.appendChild(li);
 
-    e.type === "income" ? income += e.value : expense += e.value;
+    t.type === "income" ? income += t.amount : expense += t.amount;
   });
 
-  totalIncome.textContent = `R$ ${income}`;
-  totalExpense.textContent = `R$ ${expense}`;
-  balance.textContent = `R$ ${income - expense}`;
+  document.getElementById("income").innerText = format(income);
+  document.getElementById("expense").innerText = format(expense);
+  document.getElementById("balance").innerText = format(income - expense);
+
+  updateChart(income, expense);
+}
+
+function addTransaction() {
+  const type = typeEl.value;
+  const desc = description.value.trim();
+  const value = Number(amount.value);
+
+  if (!desc || value <= 0) return alert("Dados inválidos");
+
+  transactions.unshift({type,description:desc,amount:value});
+  save();
+  update();
+
+  description.value = "";
+  amount.value = "";
+}
+
+/* ========= GRÁFICO ========= */
+let chart;
+function updateChart(income, expense) {
+  const ctx = document.getElementById("financeChart");
 
   if (chart) chart.destroy();
-  chart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Renda", "Despesas"],
-      datasets: [{ data: [income, expense] }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
+
+  chart = new Chart(ctx,{
+    type:"doughnut",
+    data:{
+      labels:["Renda","Despesas"],
+      datasets:[{
+        data:[income,expense],
+        backgroundColor:["#22c55e","#ef4444"]
+      }]
+    }
   });
 }
 
-function exportCSV() {
-  let csv = "Data,Descrição,Categoria,Tipo,Valor\n";
-  data.forEach(e => {
-    csv += `${e.date},${e.desc},${e.category},${e.type},${e.value}\n`;
-  });
-
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([csv]));
-  a.download = "MoneyZen-CS.csv";
-  a.click();
-}
-
+/* ========= PDF ========= */
 function exportPDF() {
-  html2pdf().from(document.getElementById("app")).set({
-    filename: "MoneyZen-CS-Relatorio.pdf",
-    margin: 10,
-    html2canvas: { scale: 2 },
-    jsPDF: { orientation: "portrait" }
-  }).save();
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+
+  pdf.text("MoneyZen CS - Relatório Financeiro",10,10);
+
+  pdf.text(`Renda: ${income.innerText}`,10,25);
+  pdf.text(`Despesas: ${expense.innerText}`,10,35);
+  pdf.text(`Saldo: ${balance.innerText}`,10,45);
+
+  let y = 60;
+  transactions.forEach(t=>{
+    pdf.text(`${t.description} - ${format(t.amount)}`,10,y);
+    y+=8;
+  });
+
+  pdf.save("moneyzen-relatorio.pdf");
 }
 
-function clearAll() {
-  if (confirm("Deseja apagar todo o histórico?")) {
-    data = [];
-    save();
-    render();
-  }
-}
+/* ========= TEMA ========= */
+toggleTheme.onclick = () => {
+  document.body.classList.toggle("light");
+  localStorage.setItem("theme",
+    document.body.classList.contains("light")?"light":"dark"
+  );
+};
 
-toggleTheme.onclick = () => document.body.classList.toggle("dark");
+/* ========= PWA ========= */
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  installBtn.hidden=false;
+});
+installBtn.onclick=()=>{
+  deferredPrompt.prompt();
+  deferredPrompt=null;
+  installBtn.hidden=true;
+};
 
-render();
+update();
