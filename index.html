@@ -17,7 +17,10 @@
 
 <header>
   <h1>MoneyZen <span>CS</span></h1>
-  <button id="toggleTheme">🌙</button>
+  <div class="top-actions">
+    <button id="installBtn" hidden>📲 Instalar App</button>
+    <button id="toggleTheme">🌙</button>
+  </div>
 </header>
 
 <main id="app">
@@ -77,9 +80,26 @@
 <script src="script.js"></script>
 
 <script>
+/* Service Worker */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('service-worker.js');
 }
+
+/* Botão Instalar App */
+let deferredPrompt;
+const installBtn = document.getElementById("installBtn");
+
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.hidden = false;
+});
+
+installBtn.addEventListener("click", async () => {
+  installBtn.hidden = true;
+  await deferredPrompt.prompt();
+  deferredPrompt = null;
+});
 </script>
 
 </body>
