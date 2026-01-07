@@ -1,7 +1,7 @@
 let data = JSON.parse(localStorage.getItem("moneyzen")) || [];
+let chart;
 
 const ctx = document.getElementById("chart").getContext("2d");
-let chart;
 
 function save() {
   localStorage.setItem("moneyzen", JSON.stringify(data));
@@ -47,7 +47,8 @@ function render() {
     data: {
       labels: ["Renda", "Despesas"],
       datasets: [{ data: [income, expense] }]
-    }
+    },
+    options: { responsive: true, maintainAspectRatio: false }
   });
 }
 
@@ -66,6 +67,7 @@ function exportCSV() {
 function exportPDF() {
   html2pdf().from(document.getElementById("app")).set({
     filename: "MoneyZen-CS-Relatorio.pdf",
+    margin: 10,
     html2canvas: { scale: 2 },
     jsPDF: { orientation: "portrait" }
   }).save();
