@@ -2,10 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>MoneyZen-CS 2.0</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#2563eb">
+<title>MoneyZen CS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d6efd">
 
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
@@ -17,16 +16,17 @@
 <body>
 
 <header>
-  <h1>MoneyZen-CS 2.0</h1>
+  <h1>MoneyZen <span>CS</span></h1>
   <button id="toggleTheme">🌙</button>
 </header>
 
-<main id="report">
+<main id="app">
 
-<section class="form">
+<section class="card">
+  <h2>Adicionar Registro</h2>
   <input type="date" id="date">
   <input type="text" id="desc" placeholder="Descrição">
-  <input type="number" id="value" placeholder="Valor" step="0.01">
+  <input type="number" id="value" placeholder="Valor">
 
   <select id="type">
     <option value="income">Renda</option>
@@ -34,46 +34,51 @@
   </select>
 
   <select id="category">
+    <option>Geral</option>
     <option>Alimentação</option>
     <option>Moradia</option>
     <option>Transporte</option>
     <option>Lazer</option>
-    <option>Saúde</option>
-    <option>Educação</option>
     <option>Outros</option>
   </select>
 
-  <button onclick="addTransaction()">Salvar</button>
+  <button onclick="addEntry()">Salvar</button>
 </section>
 
-<section id="summary"></section>
+<section class="card resumo">
+  <h2>Resumo Final</h2>
+  <p>Renda Total: <span id="totalIncome">R$ 0</span></p>
+  <p>Despesas Totais: <span id="totalExpense">R$ 0</span></p>
+  <p class="saldo">Saldo Final: <span id="balance">R$ 0</span></p>
+</section>
 
-<section class="chart-box">
-  <canvas id="chart"></canvas>
+<section class="card">
+  <h2>Gráfico Financeiro</h2>
+  <canvas id="chart" height="180"></canvas>
+</section>
+
+<section class="card">
+  <h2>Histórico</h2>
+  <ul id="history"></ul>
 </section>
 
 <section class="actions">
-  <button onclick="exportCSV()">Exportar CSV</button>
-  <button onclick="exportPDF()">Exportar PDF</button>
-  <button onclick="clearAll()">Limpar Histórico</button>
+  <button onclick="exportPDF()">📄 PDF Profissional</button>
+  <button onclick="exportCSV()">📥 CSV</button>
+  <button onclick="clearAll()">🧹 Limpar</button>
 </section>
-
-<section id="history"></section>
 
 </main>
 
 <footer>
-  MoneyZen-CS 2.0 • Desenvolvido por <strong>CS</strong> •
-  <a href="privacy.html" target="_blank">Política de Privacidade</a>
+  <p>MoneyZen CS © 2026 – Uso exclusivo</p>
 </footer>
 
 <script src="script.js"></script>
 
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js');
-  });
+  navigator.serviceWorker.register('service-worker.js');
 }
 </script>
 
