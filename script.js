@@ -1,120 +1,89 @@
-/* ========= BLINDAGEM ========= */
-document.addEventListener("keydown", e => {
-  if (e.ctrlKey && ["u","s","c","x","a"].includes(e.key.toLowerCase())) {
-    e.preventDefault();
-  }
-});
+let income = Number(localStorage.getItem("income")) || 0;
+let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+let chart;
 
-/* ========= DADOS ========= */
-let transactions = JSON.parse(localStorage.getItem("moneyzen")) || [];
-let theme = localStorage.getItem("theme") || "dark";
+const incomeEl = document.getElementById("income");
+const descEl = document.getElementById("desc");
+const amountEl = document.getElementById("amount");
 
-if (theme === "light") document.body.classList.add("light");
-
-/* ========= FUNÇÕES ========= */
-function save() {
-  localStorage.setItem("moneyzen", JSON.stringify(transactions));
+function saveIncome() {
+  income = Number(incomeEl.value);
+  localStorage.setItem("income", income);
+  update();
 }
 
-function format(v) {
-  return v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function addExpense() {
+  if (!amountEl.value) return;
+  expenses.unshift({
+    desc: descEl.value,
+    value: Number(amountEl.value),
+    date: new Date().toLocaleString()
+  });
+  localStorage.setItem("expenses", JSON.stringify(expenses));
+  descEl.value = "";
+  amountEl.value = "";
+  update();
 }
 
 function update() {
+  const totalExpense = expenses.reduce((a, b) => a + b.value, 0);
+  document.getElementById("totalIncome").textContent = income;
+  document.getElementById("totalExpense").textContent = totalExpense;
+  document.getElementById("balance").textContent = income - totalExpense;
+
   const history = document.getElementById("history");
   history.innerHTML = "";
-
-  let income = 0;
-  let expense = 0;
-
-  transactions.forEach(t => {
+  expenses.forEach(e => {
     const li = document.createElement("li");
-    li.textContent = `${t.description} - ${format(t.amount)}`;
+    li.textContent = `${e.date} - ${e.desc}: R$ ${e.value}`;
     history.appendChild(li);
-
-    t.type === "income" ? income += t.amount : expense += t.amount;
   });
 
-  document.getElementById("income").innerText = format(income);
-  document.getElementById("expense").innerText = format(expense);
-  document.getElementById("balance").innerText = format(income - expense);
-
-  updateChart(income, expense);
+  renderChart(income, totalExpense);
 }
 
-function addTransaction() {
-  const type = typeEl.value;
-  const desc = description.value.trim();
-  const value = Number(amount.value);
-
-  if (!desc || value <= 0) return alert("Dados inválidos");
-
-  transactions.unshift({type,description:desc,amount:value});
-  save();
-  update();
-
-  description.value = "";
-  amount.value = "";
-}
-
-/* ========= GRÁFICO ========= */
-let chart;
-function updateChart(income, expense) {
-  const ctx = document.getElementById("financeChart");
-
+function renderChart(i, e) {
   if (chart) chart.destroy();
-
-  chart = new Chart(ctx,{
-    type:"doughnut",
-    data:{
-      labels:["Renda","Despesas"],
-      datasets:[{
-        data:[income,expense],
-        backgroundColor:["#22c55e","#ef4444"]
+  chart = new Chart(document.getElementById("chart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Renda", "Despesas"],
+      datasets: [{
+        data: [i, e]
       }]
     }
   });
 }
 
-/* ========= PDF ========= */
-function exportPDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
-
-  pdf.text("MoneyZen CS - Relatório Financeiro",10,10);
-
-  pdf.text(`Renda: ${income.innerText}`,10,25);
-  pdf.text(`Despesas: ${expense.innerText}`,10,35);
-  pdf.text(`Saldo: ${balance.innerText}`,10,45);
-
-  let y = 60;
-  transactions.forEach(t=>{
-    pdf.text(`${t.description} - ${format(t.amount)}`,10,y);
-    y+=8;
-  });
-
-  pdf.save("moneyzen-relatorio.pdf");
+function clearAll() {
+  if (!confirm("Deseja apagar todos os dados?")) return;
+  localStorage.clear();
+  location.reload();
 }
 
-/* ========= TEMA ========= */
-toggleTheme.onclick = () => {
-  document.body.classList.toggle("light");
-  localStorage.setItem("theme",
-    document.body.classList.contains("light")?"light":"dark"
-  );
+function exportPDF() {
+  window.print();
+}
+
+document.getElementById("toggleTheme").onclick = () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme", document.body.className);
 };
 
-/* ========= PWA ========= */
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt",e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  installBtn.hidden=false;
-});
-installBtn.onclick=()=>{
-  deferredPrompt.prompt();
-  deferredPrompt=null;
-  installBtn.hidden=true;
-};
+if (localStorage.getItem("theme")) {
+  document.body.className = localStorage.getItem("theme");
+}
 
 update();
+
+/* PWA */
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.hidden = false;
+});
+
+installBtn.onclick = async () => {
+  deferredPrompt.prompt();
+};
