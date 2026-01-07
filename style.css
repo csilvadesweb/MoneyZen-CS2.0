@@ -1,42 +1,72 @@
-body {
+* {
+  box-sizing: border-box;
   font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  margin: 0;
+  user-select: none;
 }
 
-.dark {
-  background: #121212;
-  color: #fff;
+body {
+  margin: 0;
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+body.light {
+  background: #f8fafc;
+  color: #020617;
 }
 
 header {
-  background: #0d6efd;
-  color: #fff;
+  background: #0f766e;
   padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
+}
+
+header span {
+  color: #a7f3d0;
+}
+
+.top-actions {
+  margin-top: 10px;
 }
 
 .top-actions button {
-  margin-left: 5px;
-}
-
-.card {
-  background: #fff;
-  margin: 10px;
-  padding: 15px;
-  border-radius: 10px;
-}
-
-.dark .card {
-  background: #1e1e1e;
+  margin: 0 5px;
 }
 
 button {
   padding: 10px;
-  margin-top: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #22c55e;
+  font-weight: bold;
+}
+
+main {
+  padding: 15px;
+}
+
+.form input,
+.form select {
   width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: none;
+}
+
+.summary,
+li,
+.chart-box {
+  background: #020617;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+body.light .summary,
+body.light li,
+body.light .chart-box {
+  background: #e5e7eb;
 }
 
 ul {
@@ -44,7 +74,12 @@ ul {
   padding: 0;
 }
 
+.pdfBtn {
+  width: 100%;
+  background: #38bdf8;
+}
+
 footer {
   text-align: center;
-  padding: 10px;
+  padding: 15px;
 }
