@@ -4,102 +4,71 @@
 <meta charset="UTF-8">
 <title>MoneyZen CS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0d6efd">
+<meta name="theme-color" content="#0f766e">
 
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Blindagem básica -->
+<meta name="robots" content="noindex,nofollow">
 </head>
 
-<body>
+<body oncontextmenu="return false">
 
 <header>
   <h1>MoneyZen <span>CS</span></h1>
+
   <div class="top-actions">
-    <button id="installBtn" hidden>📲 Instalar App</button>
     <button id="toggleTheme">🌙</button>
+    <button id="installBtn" hidden>📲 Instalar</button>
   </div>
 </header>
 
-<main id="app">
+<main>
+  <section class="form">
+    <select id="type">
+      <option value="income">Renda</option>
+      <option value="expense">Despesa</option>
+    </select>
 
-<section class="card">
-  <h2>Adicionar Registro</h2>
-  <input type="date" id="date">
-  <input type="text" id="desc" placeholder="Descrição">
-  <input type="number" id="value" placeholder="Valor">
+    <input type="text" id="description" placeholder="Descrição">
+    <input type="number" id="amount" placeholder="Valor">
 
-  <select id="type">
-    <option value="income">Renda</option>
-    <option value="expense">Despesa</option>
-  </select>
+    <button onclick="addTransaction()">Adicionar</button>
+  </section>
 
-  <select id="category">
-    <option>Geral</option>
-    <option>Alimentação</option>
-    <option>Moradia</option>
-    <option>Transporte</option>
-    <option>Lazer</option>
-    <option>Outros</option>
-  </select>
+  <section class="summary">
+    <p>Renda: <strong id="income">R$ 0,00</strong></p>
+    <p>Despesas: <strong id="expense">R$ 0,00</strong></p>
+    <p>Saldo: <strong id="balance">R$ 0,00</strong></p>
+  </section>
 
-  <button onclick="addEntry()">Salvar</button>
-</section>
+  <section class="chart-box">
+    <canvas id="financeChart"></canvas>
+  </section>
 
-<section class="card resumo">
-  <h2>Resumo Final</h2>
-  <p>Renda Total: <span id="totalIncome">R$ 0</span></p>
-  <p>Despesas Totais: <span id="totalExpense">R$ 0</span></p>
-  <p class="saldo">Saldo Final: <span id="balance">R$ 0</span></p>
-</section>
+  <section>
+    <h2>Histórico</h2>
+    <ul id="history"></ul>
+  </section>
 
-<section class="card">
-  <h2>Gráfico Financeiro</h2>
-  <canvas id="chart" height="180"></canvas>
-</section>
-
-<section class="card">
-  <h2>Histórico</h2>
-  <ul id="history"></ul>
-</section>
-
-<section class="actions">
-  <button onclick="exportPDF()">📄 PDF Profissional</button>
-  <button onclick="exportCSV()">📥 CSV</button>
-  <button onclick="clearAll()">🧹 Limpar</button>
-</section>
-
+  <button class="pdfBtn" onclick="exportPDF()">📄 Exportar PDF</button>
 </main>
 
 <footer>
-  <p>MoneyZen CS © 2026 – Uso exclusivo</p>
+  <a href="privacy.html">Política de Privacidade</a>
 </footer>
+
+<!-- Bibliotecas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
 <script src="script.js"></script>
 
 <script>
-/* Service Worker */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
 }
-
-/* Botão Instalar App */
-let deferredPrompt;
-const installBtn = document.getElementById("installBtn");
-
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.hidden = false;
-});
-
-installBtn.addEventListener("click", async () => {
-  installBtn.hidden = true;
-  await deferredPrompt.prompt();
-  deferredPrompt = null;
-});
 </script>
 
 </body>
