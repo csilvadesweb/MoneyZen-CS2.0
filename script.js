@@ -20,7 +20,6 @@ const installBtn = document.getElementById("installBtn");
 function saveIncome() {
   const value = Number(incomeInput.value);
   if (!value || value <= 0) return;
-
   income = value;
   localStorage.setItem("income", income);
   updateUI();
@@ -32,7 +31,6 @@ function saveIncome() {
 function addExpense() {
   const desc = descInput.value.trim();
   const value = Number(amountInput.value);
-
   if (!desc || !value || value <= 0) return;
 
   expenses.push({
@@ -42,34 +40,25 @@ function addExpense() {
   });
 
   localStorage.setItem("expenses", JSON.stringify(expenses));
-
   descInput.value = "";
   amountInput.value = "";
-
   updateUI();
 }
 
 /* ===============================
-   ATUALIZA UI
+   UI
 ================================ */
 function updateUI() {
   const totalExpense = expenses.reduce((s, e) => s + e.value, 0);
-  const balance = income - totalExpense;
-
   document.getElementById("totalIncome").textContent = income.toFixed(2);
   document.getElementById("totalExpense").textContent = totalExpense.toFixed(2);
-  document.getElementById("balance").textContent = balance.toFixed(2);
-
+  document.getElementById("balance").textContent = (income - totalExpense).toFixed(2);
   renderHistory();
   renderChart(income, totalExpense);
 }
 
-/* ===============================
-   HISTÓRICO
-================================ */
 function renderHistory() {
   historyList.innerHTML = "";
-
   expenses.forEach(e => {
     const li = document.createElement("li");
     li.textContent = `${e.desc} | R$ ${e.value.toFixed(2)} | ${e.date}`;
@@ -83,7 +72,6 @@ function renderHistory() {
 function renderChart(i, e) {
   const ctx = document.getElementById("chart");
   if (chart) chart.destroy();
-
   chart = new Chart(ctx, {
     type: "doughnut",
     data: {
@@ -91,63 +79,76 @@ function renderChart(i, e) {
       datasets: [{ data: [i, e] }]
     },
     options: {
-      plugins: {
-        legend: { position: "bottom" }
-      }
+      plugins: { legend: { position: "bottom" } }
     }
   });
 }
 
 /* ===============================
-   PDF ENTERPRISE (1 PÁGINA)
+   PDF PREMIUM ENTERPRISE
 ================================ */
 function exportPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
 
+  const totalExpense = expenses.reduce((s, e) => s + e.value, 0);
+  const balance = income - totalExpense;
+
   let y = 15;
 
-  /* TÍTULO */
+  /* CABEÇALHO */
+  pdf.setFillColor(15, 118, 110);
+  pdf.rect(0, 0, 210, 25, "F");
+  pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(18);
-  pdf.text("MoneyZen CS - Relatório Financeiro", 105, y, { align: "center" });
-  y += 10;
+  pdf.text("MoneyZen CS", 105, 16, { align: "center" });
 
-  pdf.setFontSize(11);
-  pdf.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 105, y, { align: "center" });
-  y += 12;
+  pdf.setFontSize(10);
+  pdf.text("Relatório Financeiro", 105, 22, { align: "center" });
+
+  pdf.setTextColor(0, 0, 0);
+  y = 35;
 
   /* RESUMO */
   pdf.setFontSize(14);
   pdf.text("Resumo Financeiro", 10, y);
-  y += 6;
+  y += 8;
 
   pdf.setFontSize(11);
   pdf.text(`Renda: R$ ${income.toFixed(2)}`, 10, y);
-  y += 6;
-  pdf.text(`Despesas: R$ ${expenses.reduce((s, e) => s + e.value, 0).toFixed(2)}`, 10, y);
-  y += 6;
-  pdf.text(`Saldo: R$ ${(income - expenses.reduce((s, e) => s + e.value, 0)).toFixed(2)}`, 10, y);
-  y += 10;
+  pdf.text(`Despesas: R$ ${totalExpense.toFixed(2)}`, 70, y);
+  pdf.text(`Saldo: R$ ${balance.toFixed(2)}`, 140, y);
+  y += 12;
 
   /* GRÁFICO */
-  const chartCanvas = document.getElementById("chart");
-  const chartImg = chartCanvas.toDataURL("image/png", 1.0);
-  pdf.addImage(chartImg, "PNG", 110, 45, 80, 80);
+  const chartImg = document.getElementById("chart").toDataURL("image/png", 1.0);
+  pdf.addImage(chartImg, "PNG", 55, y, 100, 80);
+  y += 90;
 
   /* HISTÓRICO */
-  y += 5;
   pdf.setFontSize(14);
   pdf.text("Histórico de Despesas", 10, y);
   y += 6;
 
   pdf.setFontSize(10);
-
-  expenses.forEach((e, index) => {
-    if (y > 265) return; // mantém em 1 página
+  expenses.forEach((e, i) => {
+    if (y > 260) return;
     pdf.text(
-      `${index + 1}. ${e.desc} | R$ ${e.value.toFixed(2)} | ${e.date}`,
+      `${i + 1}. ${e.desc}`,
       10,
       y
+    );
+    pdf.text(
+      `R$ ${e.value.toFixed(2)}`,
+      130,
+      y,
+      { align: "right" }
+    );
+    pdf.text(
+      e.date,
+      190,
+      y,
+      { align: "right" }
     );
     y += 5;
   });
@@ -155,13 +156,13 @@ function exportPDF() {
   /* ASSINATURA */
   pdf.setFontSize(9);
   pdf.text(
-    "Desenvolvido por C. Silva – MoneyZen CS",
+    `Gerado em ${new Date().toLocaleDateString("pt-BR")} | Desenvolvido por C. Silva`,
     105,
     290,
     { align: "center" }
   );
 
-  pdf.save("MoneyZen-CS-Relatorio.pdf");
+  pdf.save("MoneyZen-CS-Relatorio-Premium.pdf");
 }
 
 /* ===============================
@@ -202,10 +203,7 @@ window.addEventListener("beforeinstallprompt", e => {
 });
 
 installBtn.onclick = () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt = null;
-  }
+  if (deferredPrompt) deferredPrompt.prompt();
 };
 
 /* ===============================
