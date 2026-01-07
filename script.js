@@ -43,7 +43,6 @@ function addExpense() {
 
   localStorage.setItem("expenses", JSON.stringify(expenses));
 
-  // Limpa campos
   descInput.value = "";
   amountInput.value = "";
 
@@ -51,10 +50,10 @@ function addExpense() {
 }
 
 /* ===============================
-   ATUALIZA INTERFACE
+   ATUALIZA UI
 ================================ */
 function updateUI() {
-  const totalExpense = expenses.reduce((sum, e) => sum + e.value, 0);
+  const totalExpense = expenses.reduce((s, e) => s + e.value, 0);
   const balance = income - totalExpense;
 
   document.getElementById("totalIncome").textContent = income.toFixed(2);
@@ -67,14 +66,13 @@ function updateUI() {
 
 /* ===============================
    HISTÓRICO
-   (primeira despesa no topo)
 ================================ */
 function renderHistory() {
   historyList.innerHTML = "";
 
-  expenses.forEach(exp => {
+  expenses.forEach(e => {
     const li = document.createElement("li");
-    li.textContent = `${exp.desc} | R$ ${exp.value.toFixed(2)} | ${exp.date}`;
+    li.textContent = `${e.desc} | R$ ${e.value.toFixed(2)} | ${e.date}`;
     historyList.appendChild(li);
   });
 }
@@ -82,64 +80,101 @@ function renderHistory() {
 /* ===============================
    GRÁFICO
 ================================ */
-function renderChart(income, expense) {
+function renderChart(i, e) {
   const ctx = document.getElementById("chart");
-
   if (chart) chart.destroy();
 
   chart = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: ["Renda", "Despesas"],
-      datasets: [{
-        data: [income, expense]
-      }]
+      datasets: [{ data: [i, e] }]
     },
     options: {
-      responsive: true,
       plugins: {
-        legend: {
-          position: "bottom"
-        }
+        legend: { position: "bottom" }
       }
     }
   });
 }
 
 /* ===============================
-   LIMPAR DADOS
+   PDF ENTERPRISE (1 PÁGINA)
 ================================ */
-function clearAll() {
-  if (!confirm("Deseja apagar todos os dados?")) return;
-
-  localStorage.clear();
-  location.reload();
-}
-
-/* ===============================
-   PDF AVANÇADO (1 FOLHA)
-================================ */
-async function exportPDF() {
-  const area = document.getElementById("pdfArea");
-  const canvas = await html2canvas(area, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
-
+function exportPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
 
-  pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
+  let y = 15;
+
+  /* TÍTULO */
+  pdf.setFontSize(18);
+  pdf.text("MoneyZen CS - Relatório Financeiro", 105, y, { align: "center" });
+  y += 10;
+
+  pdf.setFontSize(11);
+  pdf.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 105, y, { align: "center" });
+  y += 12;
+
+  /* RESUMO */
+  pdf.setFontSize(14);
+  pdf.text("Resumo Financeiro", 10, y);
+  y += 6;
+
+  pdf.setFontSize(11);
+  pdf.text(`Renda: R$ ${income.toFixed(2)}`, 10, y);
+  y += 6;
+  pdf.text(`Despesas: R$ ${expenses.reduce((s, e) => s + e.value, 0).toFixed(2)}`, 10, y);
+  y += 6;
+  pdf.text(`Saldo: R$ ${(income - expenses.reduce((s, e) => s + e.value, 0)).toFixed(2)}`, 10, y);
+  y += 10;
+
+  /* GRÁFICO */
+  const chartCanvas = document.getElementById("chart");
+  const chartImg = chartCanvas.toDataURL("image/png", 1.0);
+  pdf.addImage(chartImg, "PNG", 110, 45, 80, 80);
+
+  /* HISTÓRICO */
+  y += 5;
+  pdf.setFontSize(14);
+  pdf.text("Histórico de Despesas", 10, y);
+  y += 6;
+
   pdf.setFontSize(10);
+
+  expenses.forEach((e, index) => {
+    if (y > 265) return; // mantém em 1 página
+    pdf.text(
+      `${index + 1}. ${e.desc} | R$ ${e.value.toFixed(2)} | ${e.date}`,
+      10,
+      y
+    );
+    y += 5;
+  });
+
+  /* ASSINATURA */
+  pdf.setFontSize(9);
   pdf.text(
-    "MoneyZen CS | Desenvolvido por C. Silva | " + new Date().toLocaleDateString("pt-BR"),
-    10,
-    290
+    "Desenvolvido por C. Silva – MoneyZen CS",
+    105,
+    290,
+    { align: "center" }
   );
 
   pdf.save("MoneyZen-CS-Relatorio.pdf");
 }
 
 /* ===============================
-   TEMA CLARO / ESCURO
+   LIMPAR
+================================ */
+function clearAll() {
+  if (!confirm("Deseja apagar todos os dados?")) return;
+  localStorage.clear();
+  location.reload();
+}
+
+/* ===============================
+   TEMA
 ================================ */
 document.getElementById("toggleTheme").onclick = () => {
   document.body.classList.toggle("dark");
@@ -151,7 +186,7 @@ if (localStorage.getItem("theme")) {
 }
 
 /* ===============================
-   PWA - SERVICE WORKER
+   PWA
 ================================ */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -159,25 +194,21 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-/* ===============================
-   BOTÃO INSTALAR APP
-================================ */
 let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", event => {
-  event.preventDefault();
-  deferredPrompt = event;
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
   installBtn.hidden = false;
 });
 
-installBtn.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt = null;
-  installBtn.hidden = true;
-});
+installBtn.onclick = () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt = null;
+  }
+};
 
 /* ===============================
-   INICIALIZAÇÃO
+   INIT
 ================================ */
 updateUI();
