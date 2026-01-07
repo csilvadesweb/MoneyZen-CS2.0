@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <title>MoneyZen CS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
 <meta name="theme-color" content="#0f766e">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -15,6 +19,8 @@
   <h1>MoneyZen CS</h1>
   <button id="toggleTheme">🌙</button>
 </header>
+
+<main id="pdfArea">
 
 <section class="card">
   <h2>Renda</h2>
@@ -24,15 +30,15 @@
 
 <section class="card">
   <h2>Despesas</h2>
-  <input type="text" id="desc" placeholder="Descrição">
+  <input type="text" id="desc" placeholder="Nome da despesa">
   <input type="number" id="amount" placeholder="Valor">
-  <button onclick="addExpense()">Adicionar</button>
+  <button onclick="addExpense()">Salvar Despesa</button>
 </section>
 
 <section class="card resumo">
-  <p>Renda: <span id="totalIncome">0</span></p>
-  <p>Despesas: <span id="totalExpense">0</span></p>
-  <p>Saldo: <span id="balance">0</span></p>
+  <p>Renda: <strong>R$ <span id="totalIncome">0</span></strong></p>
+  <p>Despesas: <strong>R$ <span id="totalExpense">0</span></strong></p>
+  <p>Saldo: <strong>R$ <span id="balance">0</span></strong></p>
 </section>
 
 <section class="card">
@@ -44,6 +50,8 @@
   <ul id="history"></ul>
 </section>
 
+</main>
+
 <section class="actions">
   <button onclick="exportPDF()">Exportar PDF</button>
   <button onclick="clearAll()" class="danger">Limpar Tudo</button>
@@ -51,7 +59,7 @@
 </section>
 
 <footer>
-  <p>© MoneyZen CS – Desenvolvido por C. Silva</p>
+  © MoneyZen CS – Desenvolvido por C. Silva
 </footer>
 
 <script src="script.js"></script>
