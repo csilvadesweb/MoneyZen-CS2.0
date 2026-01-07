@@ -1,212 +1,227 @@
-/* ===============================
-   ESTADO GLOBAL
-================================ */
-let income = Number(localStorage.getItem("income")) || 0;
-let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+/* =====================================================
+   MoneyZen CS - Script Oficial
+   © C.Silva - Uso Proprietário
+   ===================================================== */
+
+let renda = 0;
+let despesas = [];
 let chart = null;
 
-/* ===============================
-   ELEMENTOS
-================================ */
-const incomeInput = document.getElementById("income");
-const descInput = document.getElementById("desc");
-const amountInput = document.getElementById("amount");
-const historyList = document.getElementById("history");
-const installBtn = document.getElementById("installBtn");
+/* =====================
+   LOCAL STORAGE
+===================== */
+function salvarDados() {
+  localStorage.setItem("moneyzen_renda", renda);
+  localStorage.setItem("moneyzen_despesas", JSON.stringify(despesas));
+}
 
-/* ===============================
+function carregarDados() {
+  renda = Number(localStorage.getItem("moneyzen_renda")) || 0;
+  despesas = JSON.parse(localStorage.getItem("moneyzen_despesas")) || [];
+}
+
+/* =====================
+   UTILIDADES
+===================== */
+function formatarMoeda(valor) {
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  });
+}
+
+function dataAtual() {
+  return new Date().toLocaleDateString("pt-BR");
+}
+
+/* =====================
    RENDA
-================================ */
-function saveIncome() {
-  const value = Number(incomeInput.value);
-  if (!value || value <= 0) return;
-  income = value;
-  localStorage.setItem("income", income);
-  updateUI();
+===================== */
+function salvarRenda() {
+  const input = document.getElementById("inputRenda");
+  const valor = Number(input.value);
+
+  if (!valor || valor <= 0) return;
+
+  renda = valor;
+  input.value = "";
+  salvarDados();
+  atualizarTela();
 }
 
-/* ===============================
+/* =====================
    DESPESAS
-================================ */
-function addExpense() {
-  const desc = descInput.value.trim();
-  const value = Number(amountInput.value);
-  if (!desc || !value || value <= 0) return;
+===================== */
+function salvarDespesa() {
+  const nome = document.getElementById("inputDespesaNome").value.trim();
+  const valor = Number(document.getElementById("inputDespesaValor").value);
 
-  expenses.push({
-    desc,
-    value,
-    date: new Date().toLocaleDateString("pt-BR")
+  if (!nome || !valor || valor <= 0) return;
+
+  despesas.push({
+    nome,
+    valor,
+    data: dataAtual()
   });
 
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-  descInput.value = "";
-  amountInput.value = "";
-  updateUI();
+  document.getElementById("inputDespesaNome").value = "";
+  document.getElementById("inputDespesaValor").value = "";
+
+  salvarDados();
+  atualizarTela();
 }
 
-/* ===============================
-   UI
-================================ */
-function updateUI() {
-  const totalExpense = expenses.reduce((s, e) => s + e.value, 0);
-  document.getElementById("totalIncome").textContent = income.toFixed(2);
-  document.getElementById("totalExpense").textContent = totalExpense.toFixed(2);
-  document.getElementById("balance").textContent = (income - totalExpense).toFixed(2);
-  renderHistory();
-  renderChart(income, totalExpense);
+/* =====================
+   RESUMO
+===================== */
+function totalDespesas() {
+  return despesas.reduce((acc, d) => acc + d.valor, 0);
 }
 
-function renderHistory() {
-  historyList.innerHTML = "";
-  expenses.forEach(e => {
-    const li = document.createElement("li");
-    li.textContent = `${e.desc} | R$ ${e.value.toFixed(2)} | ${e.date}`;
-    historyList.appendChild(li);
+function saldoFinal() {
+  return renda - totalDespesas();
+}
+
+/* =====================
+   HISTÓRICO
+===================== */
+function renderHistorico() {
+  const lista = document.getElementById("historico");
+  lista.innerHTML = "";
+
+  despesas.forEach((d) => {
+    const item = document.createElement("div");
+    item.className = "historico-item";
+    item.innerHTML = `
+      <span>${d.nome}<br><small>${d.data}</small></span>
+      <strong>${formatarMoeda(d.valor)}</strong>
+    `;
+    lista.appendChild(item);
   });
 }
 
-/* ===============================
+/* =====================
    GRÁFICO
-================================ */
-function renderChart(i, e) {
-  const ctx = document.getElementById("chart");
+===================== */
+function renderGrafico() {
+  const ctx = document.getElementById("grafico").getContext("2d");
+
   if (chart) chart.destroy();
+
   chart = new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: ["Renda", "Despesas"],
-      datasets: [{ data: [i, e] }]
+      datasets: [{
+        data: [renda, totalDespesas()],
+        backgroundColor: ["#0f4c6a", "#d9534f"]
+      }]
     },
     options: {
-      plugins: { legend: { position: "bottom" } }
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      }
     }
   });
 }
 
-/* ===============================
-   PDF PREMIUM ENTERPRISE
-================================ */
-function exportPDF() {
+/* =====================
+   PDF PROFISSIONAL (1 FOLHA)
+===================== */
+async function exportarPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF("p", "mm", "a4");
 
-  const totalExpense = expenses.reduce((s, e) => s + e.value, 0);
-  const balance = income - totalExpense;
-
   let y = 15;
 
-  /* CABEÇALHO */
-  pdf.setFillColor(15, 118, 110);
-  pdf.rect(0, 0, 210, 25, "F");
-  pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(18);
-  pdf.text("MoneyZen CS", 105, 16, { align: "center" });
+  pdf.text("MoneyZen CS - Relatório Financeiro", 105, y, { align: "center" });
 
-  pdf.setFontSize(10);
-  pdf.text("Relatório Financeiro", 105, 22, { align: "center" });
-
-  pdf.setTextColor(0, 0, 0);
-  y = 35;
-
-  /* RESUMO */
-  pdf.setFontSize(14);
-  pdf.text("Resumo Financeiro", 10, y);
-  y += 8;
-
+  y += 10;
   pdf.setFontSize(11);
-  pdf.text(`Renda: R$ ${income.toFixed(2)}`, 10, y);
-  pdf.text(`Despesas: R$ ${totalExpense.toFixed(2)}`, 70, y);
-  pdf.text(`Saldo: R$ ${balance.toFixed(2)}`, 140, y);
+  pdf.text(`Data: ${dataAtual()}`, 105, y, { align: "center" });
+
   y += 12;
+  pdf.setFontSize(13);
+  pdf.text("Resumo", 10, y);
 
-  /* GRÁFICO */
-  const chartImg = document.getElementById("chart").toDataURL("image/png", 1.0);
-  pdf.addImage(chartImg, "PNG", 55, y, 100, 80);
-  y += 90;
-
-  /* HISTÓRICO */
-  pdf.setFontSize(14);
-  pdf.text("Histórico de Despesas", 10, y);
+  y += 8;
+  pdf.setFontSize(11);
+  pdf.text(`Renda: ${formatarMoeda(renda)}`, 10, y);
   y += 6;
+  pdf.text(`Despesas: ${formatarMoeda(totalDespesas())}`, 10, y);
+  y += 6;
+  pdf.text(`Saldo: ${formatarMoeda(saldoFinal())}`, 10, y);
 
+  y += 10;
+  const canvas = document.getElementById("grafico");
+  const imgData = canvas.toDataURL("image/png");
+  pdf.addImage(imgData, "PNG", 110, 45, 80, 80);
+
+  y += 40;
+  pdf.setFontSize(13);
+  pdf.text("Histórico de Despesas", 10, y);
+
+  y += 8;
   pdf.setFontSize(10);
-  expenses.forEach((e, i) => {
-    if (y > 260) return;
-    pdf.text(
-      `${i + 1}. ${e.desc}`,
-      10,
-      y
-    );
-    pdf.text(
-      `R$ ${e.value.toFixed(2)}`,
-      130,
-      y,
-      { align: "right" }
-    );
-    pdf.text(
-      e.date,
-      190,
-      y,
-      { align: "right" }
-    );
-    y += 5;
+
+  despesas.forEach((d) => {
+    if (y > 270) return;
+    pdf.text(`${d.data} - ${d.nome} - ${formatarMoeda(d.valor)}`, 10, y);
+    y += 6;
   });
 
-  /* ASSINATURA */
   pdf.setFontSize(9);
-  pdf.text(
-    `Gerado em ${new Date().toLocaleDateString("pt-BR")} | Desenvolvido por C. Silva`,
-    105,
-    290,
-    { align: "center" }
-  );
+  pdf.text("Assinatura: MoneyZen CS © C.Silva", 105, 290, { align: "center" });
 
-  pdf.save("MoneyZen-CS-Relatorio-Premium.pdf");
+  pdf.save("MoneyZen-CS-Relatorio.pdf");
 }
 
-/* ===============================
-   LIMPAR
-================================ */
-function clearAll() {
+/* =====================
+   LIMPAR DADOS
+===================== */
+function limparTudo() {
   if (!confirm("Deseja apagar todos os dados?")) return;
-  localStorage.clear();
-  location.reload();
+  renda = 0;
+  despesas = [];
+  salvarDados();
+  atualizarTela();
 }
 
-/* ===============================
-   TEMA
-================================ */
-document.getElementById("toggleTheme").onclick = () => {
+/* =====================
+   DARK MODE
+===================== */
+function alternarTema() {
   document.body.classList.toggle("dark");
-  localStorage.setItem("theme", document.body.className);
-};
-
-if (localStorage.getItem("theme")) {
-  document.body.className = localStorage.getItem("theme");
+  localStorage.setItem(
+    "moneyzen_tema",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
 }
 
-/* ===============================
-   PWA
-================================ */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js");
-  });
+function carregarTema() {
+  const tema = localStorage.getItem("moneyzen_tema");
+  if (tema === "dark") document.body.classList.add("dark");
 }
 
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.hidden = false;
-});
+/* =====================
+   ATUALIZAÇÃO GERAL
+===================== */
+function atualizarTela() {
+  document.getElementById("valorRenda").innerText = formatarMoeda(renda);
+  document.getElementById("valorDespesas").innerText = formatarMoeda(totalDespesas());
+  document.getElementById("valorSaldo").innerText = formatarMoeda(saldoFinal());
 
-installBtn.onclick = () => {
-  if (deferredPrompt) deferredPrompt.prompt();
-};
+  renderHistorico();
+  renderGrafico();
+}
 
-/* ===============================
+/* =====================
    INIT
-================================ */
-updateUI();
+===================== */
+window.onload = () => {
+  carregarDados();
+  carregarTema();
+  atualizarTela();
+};
