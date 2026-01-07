@@ -1,13 +1,14 @@
 :root {
-  --bg: #f9fafb;
-  --text: #111;
-  --card: #fff;
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --shadow: 0 10px 25px rgba(0,0,0,.08);
 }
 
 .dark {
-  --bg: #0f172a;
-  --text: #f9fafb;
-  --card: #1e293b;
+  --bg: #020617;
+  --card: #020617;
+  --text: #e5e7eb;
 }
 
 body {
@@ -19,7 +20,7 @@ body {
 
 header {
   background: #0f766e;
-  color: #fff;
+  color: white;
   padding: 15px;
   display: flex;
   justify-content: space-between;
@@ -29,28 +30,33 @@ header {
   background: var(--card);
   margin: 15px;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 14px;
+  box-shadow: var(--shadow);
 }
 
 input, button {
   width: 100%;
-  margin-top: 8px;
   padding: 10px;
+  margin-top: 8px;
 }
 
 button {
   background: #0f766e;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 button.danger {
   background: #b91c1c;
 }
 
+ul {
+  padding-left: 18px;
+}
+
 footer {
   text-align: center;
-  padding: 10px;
   font-size: 13px;
+  padding: 10px;
 }
