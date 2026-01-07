@@ -1,21 +1,7 @@
-MoneyZen CS – Licença Proprietária Comercial
-
-Copyright © 2026 CS
-
-Este software é propriedade intelectual exclusiva de CS.
-
-É expressamente PROIBIDO:
-- Copiar, clonar ou redistribuir este código
-- Modificar ou criar obras derivadas
-- Utilizar como base para projetos pessoais ou comerciais
-- Publicar total ou parcialmente em qualquer plataforma
-
-PERMITIDO:
-- Uso pessoal exclusivo pelo autor original
-- Hospedagem privada no GitHub Pages do autor
-
-Este software é protegido pelas leis de direitos autorais
-brasileiras e internacionais.
-
-Contato oficial:
-csdesweb@gmail.com
+LICENSE
+index.html
+manifest.json
+privacy.html
+script.js
+service-worker.js
+style.css
