@@ -1,10 +1,11 @@
-const CACHE = "moneyzen-cs-v2";
+const CACHE = "moneyzen-cs-v3";
 const FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./privacy.html"
 ];
 
 self.addEventListener("install", e => {
