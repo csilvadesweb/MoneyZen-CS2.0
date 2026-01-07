@@ -1,17 +1,20 @@
-const CACHE = "moneyzen-cs-v3";
-const FILES = [
+const CACHE = "moneyzen-v1";
+const ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
-  "./manifest.json",
-  "./privacy.html"
+  "./manifest.json"
 ];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+  e.waitUntil(
+    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
+  );
 });
 
 self.addEventListener("fetch", e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+  e.respondWith(
+    caches.match(e.request).then(res => res || fetch(e.request))
+  );
 });
