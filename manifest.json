@@ -1,7 +1,8 @@
 {
   "name": "MoneyZen CS",
   "short_name": "MoneyZen",
-  "start_url": ".",
+  "start_url": "/MoneyZen-CS2.0/",
+  "scope": "/MoneyZen-CS2.0/",
   "display": "standalone",
   "background_color": "#0f766e",
   "theme_color": "#0f766e",
