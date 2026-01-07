@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MoneyZen-CS 2.0</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2563eb">
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+<header>
+  <h1>MoneyZen-CS 2.0</h1>
+  <button id="toggleTheme">🌙</button>
+</header>
+
+<main>
+
+<section class="form">
+  <input type="date" id="date">
+  <input type="text" id="desc" placeholder="Descrição">
+  <input type="number" id="value" placeholder="Valor" step="0.01">
+
+  <select id="type">
+    <option value="income">Renda</option>
+    <option value="expense">Despesa</option>
+  </select>
+
+  <select id="category">
+    <option>Alimentação</option>
+    <option>Moradia</option>
+    <option>Transporte</option>
+    <option>Lazer</option>
+    <option>Saúde</option>
+    <option>Educação</option>
+    <option>Outros</option>
+  </select>
+
+  <button onclick="addTransaction()">Salvar</button>
+</section>
+
+<section id="summary"></section>
+
+<section class="chart-container">
+  <canvas id="chart"></canvas>
+</section>
+
+<section class="actions">
+  <button onclick="exportCSV()">Exportar CSV</button>
+  <button onclick="exportPDF()">Exportar PDF</button>
+  <button onclick="clearAll()">Limpar Histórico</button>
+</section>
+
+<section id="history"></section>
+
+</main>
+
+<footer>
+  <p>
+    MoneyZen-CS 2.0 • Desenvolvido por <strong>CS</strong> •
+    <a href="privacy.html" target="_blank">Política de Privacidade</a>
+  </p>
+</footer>
+
+<script src="script.js"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js');
+  });
+}
+</script>
+
+</body>
+</html>
