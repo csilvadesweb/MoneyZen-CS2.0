@@ -4,72 +4,56 @@
 <meta charset="UTF-8">
 <title>MoneyZen CS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0f766e">
-
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
-
-<!-- Blindagem básica -->
-<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f766e">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
-<body oncontextmenu="return false">
-
+<body>
 <header>
-  <h1>MoneyZen <span>CS</span></h1>
-
-  <div class="top-actions">
-    <button id="toggleTheme">🌙</button>
-    <button id="installBtn" hidden>📲 Instalar</button>
-  </div>
+  <h1>MoneyZen CS</h1>
+  <button id="toggleTheme">🌙</button>
 </header>
 
-<main>
-  <section class="form">
-    <select id="type">
-      <option value="income">Renda</option>
-      <option value="expense">Despesa</option>
-    </select>
+<section class="card">
+  <h2>Renda</h2>
+  <input type="number" id="income" placeholder="Digite sua renda">
+  <button onclick="saveIncome()">Salvar Renda</button>
+</section>
 
-    <input type="text" id="description" placeholder="Descrição">
-    <input type="number" id="amount" placeholder="Valor">
+<section class="card">
+  <h2>Despesas</h2>
+  <input type="text" id="desc" placeholder="Descrição">
+  <input type="number" id="amount" placeholder="Valor">
+  <button onclick="addExpense()">Adicionar</button>
+</section>
 
-    <button onclick="addTransaction()">Adicionar</button>
-  </section>
+<section class="card resumo">
+  <p>Renda: <span id="totalIncome">0</span></p>
+  <p>Despesas: <span id="totalExpense">0</span></p>
+  <p>Saldo: <span id="balance">0</span></p>
+</section>
 
-  <section class="summary">
-    <p>Renda: <strong id="income">R$ 0,00</strong></p>
-    <p>Despesas: <strong id="expense">R$ 0,00</strong></p>
-    <p>Saldo: <strong id="balance">R$ 0,00</strong></p>
-  </section>
+<section class="card">
+  <canvas id="chart"></canvas>
+</section>
 
-  <section class="chart-box">
-    <canvas id="financeChart"></canvas>
-  </section>
+<section class="card">
+  <h2>Histórico</h2>
+  <ul id="history"></ul>
+</section>
 
-  <section>
-    <h2>Histórico</h2>
-    <ul id="history"></ul>
-  </section>
-
-  <button class="pdfBtn" onclick="exportPDF()">📄 Exportar PDF</button>
-</main>
+<section class="actions">
+  <button onclick="exportPDF()">Exportar PDF</button>
+  <button onclick="clearAll()" class="danger">Limpar Tudo</button>
+  <button id="installBtn" hidden>Instalar App</button>
+</section>
 
 <footer>
-  <a href="privacy.html">Política de Privacidade</a>
+  <p>© MoneyZen CS – Desenvolvido por C. Silva</p>
 </footer>
 
-<!-- Bibliotecas -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-
 <script src="script.js"></script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
 </body>
 </html>
