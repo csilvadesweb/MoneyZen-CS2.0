@@ -1,67 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>MoneyZen CS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <title>MoneyZen CS</title>
 
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
-<meta name="theme-color" content="#0f766e">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="theme-color" content="#0b2c3d" />
+  <meta name="description" content="MoneyZen CS - Controle financeiro inteligente, simples e profissional." />
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MoneyZen CS" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- Bibliotecas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
-<header>
-  <h1>MoneyZen CS</h1>
-  <button id="toggleTheme">🌙</button>
-</header>
 
-<main id="pdfArea">
+  <header>
+    <h1>MoneyZen CS</h1>
+  </header>
 
-<section class="card">
-  <h2>Renda</h2>
-  <input type="number" id="income" placeholder="Digite sua renda">
-  <button onclick="saveIncome()">Salvar Renda</button>
-</section>
+  <div class="app-container">
 
-<section class="card">
-  <h2>Despesas</h2>
-  <input type="text" id="desc" placeholder="Nome da despesa">
-  <input type="number" id="amount" placeholder="Valor">
-  <button onclick="addExpense()">Salvar Despesa</button>
-</section>
+    <!-- RESUMO -->
+    <div class="card resumo">
+      <div class="card">
+        <h3>Renda</h3>
+        <p id="valorRenda">R$ 0,00</p>
+      </div>
+      <div class="card">
+        <h3>Despesas</h3>
+        <p id="valorDespesas">R$ 0,00</p>
+      </div>
+      <div class="card">
+        <h3>Saldo</h3>
+        <p id="valorSaldo">R$ 0,00</p>
+      </div>
+    </div>
 
-<section class="card resumo">
-  <p>Renda: <strong>R$ <span id="totalIncome">0</span></strong></p>
-  <p>Despesas: <strong>R$ <span id="totalExpense">0</span></strong></p>
-  <p>Saldo: <strong>R$ <span id="balance">0</span></strong></p>
-</section>
+    <!-- RENDA -->
+    <div class="card">
+      <h2>Adicionar Renda</h2>
+      <input id="inputRenda" type="number" placeholder="Valor da renda" />
+      <button onclick="salvarRenda()">Salvar Renda</button>
+    </div>
 
-<section class="card">
-  <canvas id="chart"></canvas>
-</section>
+    <!-- DESPESA -->
+    <div class="card">
+      <h2>Adicionar Despesa</h2>
+      <input id="inputDespesaNome" type="text" placeholder="Nome da despesa" />
+      <input id="inputDespesaValor" type="number" placeholder="Valor da despesa" />
+      <button onclick="salvarDespesa()">Salvar Despesa</button>
+    </div>
 
-<section class="card">
-  <h2>Histórico</h2>
-  <ul id="history"></ul>
-</section>
+    <!-- GRÁFICO -->
+    <div class="card">
+      <h2>Gráfico</h2>
+      <canvas id="grafico" height="220"></canvas>
+    </div>
 
-</main>
+    <!-- HISTÓRICO -->
+    <div class="card">
+      <h2>Histórico de Despesas</h2>
+      <div id="historico"></div>
+    </div>
 
-<section class="actions">
-  <button onclick="exportPDF()">Exportar PDF</button>
-  <button onclick="clearAll()" class="danger">Limpar Tudo</button>
-  <button id="installBtn" hidden>Instalar App</button>
-</section>
+    <!-- AÇÕES -->
+    <div class="card">
+      <button onclick="exportarPDF()">Exportar PDF</button>
+      <button onclick="limparTudo()">Limpar Dados</button>
+      <button onclick="alternarTema()">Claro / Escuro</button>
+    </div>
 
-<footer>
-  © MoneyZen CS – Desenvolvido por C. Silva
-</footer>
+  </div>
 
-<script src="script.js"></script>
+  <!-- SCRIPT PRINCIPAL -->
+  <script src="script.js"></script>
+
+  <!-- SERVICE WORKER -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js");
+      });
+    }
+  </script>
+
 </body>
 </html>
