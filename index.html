@@ -8,12 +8,13 @@
 <meta name="theme-color" content="#0b2c3d">
 <meta name="description" content="MoneyZen CS - Controle financeiro inteligente e profissional">
 
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
+<!-- MANIFEST (CORRIGIDO) -->
+<link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="./style.css">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MoneyZen CS">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -22,7 +23,7 @@
 <body>
 
 <header class="app-header">
-<h1>MoneyZen CS</h1>
+  <h1>MoneyZen CS</h1>
 </header>
 
 <div class="app-container">
@@ -45,42 +46,42 @@
 
 <!-- RENDA -->
 <div class="card">
-<h2>Adicionar Renda</h2>
-<input id="inputRendaNome" type="text" placeholder="Nome da renda">
-<input id="inputRendaValor" type="number" placeholder="Valor da renda">
-<button onclick="salvarRenda()">Salvar Renda</button>
+  <h2>Adicionar Renda</h2>
+  <input id="inputRendaNome" type="text" placeholder="Nome da renda">
+  <input id="inputRendaValor" type="number" placeholder="Valor da renda">
+  <button onclick="salvarRenda()">Salvar Renda</button>
 </div>
 
 <!-- DESPESA -->
 <div class="card">
-<h2>Adicionar Despesa</h2>
-<input id="inputDespesaNome" type="text" placeholder="Nome da despesa">
-<input id="inputDespesaValor" type="number" placeholder="Valor da despesa">
-<button onclick="salvarDespesa()">Salvar Despesa</button>
+  <h2>Adicionar Despesa</h2>
+  <input id="inputDespesaNome" type="text" placeholder="Nome da despesa">
+  <input id="inputDespesaValor" type="number" placeholder="Valor da despesa">
+  <button onclick="salvarDespesa()">Salvar Despesa</button>
 </div>
 
 <!-- GRÁFICO -->
 <div class="card">
-<h2>Gráfico</h2>
-<canvas id="grafico"></canvas>
+  <h2>Gráfico</h2>
+  <canvas id="grafico"></canvas>
 </div>
 
 <!-- HISTÓRICO -->
 <div class="card">
-<h2>Histórico</h2>
-<div id="historico"></div>
+  <h2>Histórico</h2>
+  <div id="historico"></div>
 </div>
 
 <!-- AÇÕES -->
 <div class="card">
-<button onclick="exportarPDF()">Exportar PDF</button>
-<button onclick="alternarTema()">Claro / Escuro</button>
-<button onclick="limparTudo()">Limpar Dados</button>
+  <button onclick="exportarPDF()">Exportar PDF</button>
+  <button onclick="alternarTema()">Claro / Escuro</button>
+  <button onclick="limparTudo()">Limpar Dados</button>
 </div>
 
 </div>
 
-<script src="script.js"></script>
+<script src="./script.js"></script>
 
 <script>
 if ("serviceWorker" in navigator) {
