@@ -7,7 +7,8 @@
   <meta name="apple-mobile-web-app-title" content="MoneyZen CS" />  
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />    <!-- Bibliotecas -->    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>  </head>  <body>    <header class="app-header">  
     <h1>MoneyZen CS</h1>  
-  </header>    <main class="app-container">  <!-- RESUMO -->  
+  </header>    <main class="app-container">  
+
 <section class="card resumo">  
   <div class="card resumo-item">  
     <h3>Renda</h3>  
@@ -25,65 +26,46 @@
   </div>  
 </section>  
 
-<!-- RENDA -->  
 <section class="card">  
   <h2>Adicionar Renda</h2>  
-  <input  
-    id="inputRenda"  
-    type="number"  
-    placeholder="Valor da renda"  
-    inputmode="decimal"  
-  />  
+  <input id="inputRenda" type="number" placeholder="Valor da renda" inputmode="decimal" />  
   <button type="button" onclick="salvarRenda()">Salvar Renda</button>  
 </section>  
 
-<!-- DESPESA -->  
 <section class="card">  
   <h2>Adicionar Despesa</h2>  
-
-  <input  
-    id="inputDespesaNome"  
-    type="text"  
-    placeholder="Nome da despesa"  
-  />  
-
-  <input  
-    id="inputDespesaValor"  
-    type="number"  
-    placeholder="Valor da despesa"  
-    inputmode="decimal"  
-  />  
-
+  <input id="inputDespesaNome" type="text" placeholder="Nome da despesa" />  
+  <input id="inputDespesaValor" type="number" placeholder="Valor da despesa" inputmode="decimal" />  
   <button type="button" onclick="salvarDespesa()">Salvar Despesa</button>  
 </section>  
 
-<!-- GRÁFICO -->  
 <section class="card">  
   <h2>Gráfico</h2>  
   <canvas id="grafico" height="220"></canvas>  
 </section>  
 
-<!-- HISTÓRICO -->  
 <section class="card">  
   <h2>Histórico de Despesas</h2>  
   <div id="historico"></div>  
 </section>  
 
-<!-- AÇÕES -->  
 <section class="card">  
   <button type="button" onclick="exportarPDF()">Exportar PDF</button>  
   <button type="button" onclick="limparTudo()">Limpar Dados</button>  
   <button type="button" onclick="alternarTema()">Claro / Escuro</button>  
 </section>
 
-  </main>    <!-- SCRIPT PRINCIPAL -->    <script src="./script.js"></script>    <!-- SERVICE WORKER (OBRIGATÓRIO PARA INSTALAR APP) -->    <script>  
-    if ("serviceWorker" in navigator) {  
-      window.addEventListener("load", () => {  
-        navigator.serviceWorker  
-          .register("./service-worker.js")  
-          .then(() => console.log("Service Worker ativo"))  
-          .catch(err => console.error("Erro no Service Worker:", err));  
-      });  
-    }  
-  </script>  </body>  
+</main>  
+
+<script src="./script.js"></script>  
+
+<script>  
+if ("serviceWorker" in navigator) {  
+  window.addEventListener("load", () => {  
+    navigator.serviceWorker.register("./service-worker.js");  
+  });  
+}  
+</script>  
+
+</body>  
 </html>
