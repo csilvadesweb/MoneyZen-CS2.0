@@ -1,71 +1,94 @@
-<!DOCTYPE html>  <html lang="pt-BR">  
-<head>  
-  <meta charset="UTF-8" />    <title>MoneyZen CS</title>    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />  
-  <meta name="theme-color" content="#0b2c3d" />  
-  <meta name="description" content="MoneyZen CS - Controle financeiro inteligente, simples e profissional." />    <!-- PWA -->    <link rel="manifest" href="./manifest.json" />    <!-- Estilo -->    <link rel="stylesheet" href="./style.css" />    <!-- iOS PWA -->    <meta name="apple-mobile-web-app-capable" content="yes" />  
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />  
-  <meta name="apple-mobile-web-app-title" content="MoneyZen CS" />  
-  <link rel="apple-touch-icon" href="./icons/icon-192.png" />    <!-- Bibliotecas -->    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>  </head>  <body>    <header class="app-header">  
-    <h1>MoneyZen CS</h1>  
-  </header>    <main class="app-container">  
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>MoneyZen CS</title>
 
-<section class="card resumo">  
-  <div class="card resumo-item">  
-    <h3>Renda</h3>  
-    <p id="valorRenda">R$ 0,00</p>  
-  </div>  
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#0b2c3d">
+<meta name="description" content="MoneyZen CS - Controle financeiro inteligente e profissional">
 
-  <div class="card resumo-item">  
-    <h3>Despesas</h3>  
-    <p id="valorDespesas">R$ 0,00</p>  
-  </div>  
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
 
-  <div class="card resumo-item">  
-    <h3>Saldo</h3>  
-    <p id="valorSaldo">R$ 0,00</p>  
-  </div>  
-</section>  
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MoneyZen CS">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 
-<section class="card">  
-  <h2>Adicionar Renda</h2>  
-  <input id="inputRenda" type="number" placeholder="Valor da renda" inputmode="decimal" />  
-  <button type="button" onclick="salvarRenda()">Salvar Renda</button>  
-</section>  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
 
-<section class="card">  
-  <h2>Adicionar Despesa</h2>  
-  <input id="inputDespesaNome" type="text" placeholder="Nome da despesa" />  
-  <input id="inputDespesaValor" type="number" placeholder="Valor da despesa" inputmode="decimal" />  
-  <button type="button" onclick="salvarDespesa()">Salvar Despesa</button>  
-</section>  
+<body>
 
-<section class="card">  
-  <h2>Gráfico</h2>  
-  <canvas id="grafico" height="220"></canvas>  
-</section>  
+<header class="app-header">
+<h1>MoneyZen CS</h1>
+</header>
 
-<section class="card">  
-  <h2>Histórico de Despesas</h2>  
-  <div id="historico"></div>  
-</section>  
+<div class="app-container">
 
-<section class="card">  
-  <button type="button" onclick="exportarPDF()">Exportar PDF</button>  
-  <button type="button" onclick="limparTudo()">Limpar Dados</button>  
-  <button type="button" onclick="alternarTema()">Claro / Escuro</button>  
-</section>
+<!-- RESUMO -->
+<div class="card resumo">
+  <div class="resumo-item">
+    <h3>Renda</h3>
+    <p id="valorRenda">R$ 0,00</p>
+  </div>
+  <div class="resumo-item">
+    <h3>Despesas</h3>
+    <p id="valorDespesas">R$ 0,00</p>
+  </div>
+  <div class="resumo-item">
+    <h3>Saldo</h3>
+    <p id="valorSaldo">R$ 0,00</p>
+  </div>
+</div>
 
-</main>  
+<!-- RENDA -->
+<div class="card">
+<h2>Adicionar Renda</h2>
+<input id="inputRendaNome" type="text" placeholder="Nome da renda">
+<input id="inputRendaValor" type="number" placeholder="Valor da renda">
+<button onclick="salvarRenda()">Salvar Renda</button>
+</div>
 
-<script src="./script.js"></script>  
+<!-- DESPESA -->
+<div class="card">
+<h2>Adicionar Despesa</h2>
+<input id="inputDespesaNome" type="text" placeholder="Nome da despesa">
+<input id="inputDespesaValor" type="number" placeholder="Valor da despesa">
+<button onclick="salvarDespesa()">Salvar Despesa</button>
+</div>
 
-<script>  
-if ("serviceWorker" in navigator) {  
-  window.addEventListener("load", () => {  
-    navigator.serviceWorker.register("./service-worker.js");  
-  });  
-}  
-</script>  
+<!-- GRÁFICO -->
+<div class="card">
+<h2>Gráfico</h2>
+<canvas id="grafico"></canvas>
+</div>
 
-</body>  
+<!-- HISTÓRICO -->
+<div class="card">
+<h2>Histórico</h2>
+<div id="historico"></div>
+</div>
+
+<!-- AÇÕES -->
+<div class="card">
+<button onclick="exportarPDF()">Exportar PDF</button>
+<button onclick="alternarTema()">Claro / Escuro</button>
+<button onclick="limparTudo()">Limpar Dados</button>
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
+</script>
+
+</body>
 </html>
