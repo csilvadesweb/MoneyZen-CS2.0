@@ -1,227 +1,99 @@
-/* =====================================================
-   MoneyZen CS - Script Oficial
-   © C.Silva - Uso Proprietário
-   ===================================================== */
-
-let renda = 0;
+let rendas = [];
 let despesas = [];
-let chart = null;
+let chart;
 
-/* =====================
-   LOCAL STORAGE
-===================== */
 function salvarDados() {
-  localStorage.setItem("moneyzen_renda", renda);
+  localStorage.setItem("moneyzen_rendas", JSON.stringify(rendas));
   localStorage.setItem("moneyzen_despesas", JSON.stringify(despesas));
 }
 
 function carregarDados() {
-  renda = Number(localStorage.getItem("moneyzen_renda")) || 0;
+  rendas = JSON.parse(localStorage.getItem("moneyzen_rendas")) || [];
   despesas = JSON.parse(localStorage.getItem("moneyzen_despesas")) || [];
 }
 
-/* =====================
-   UTILIDADES
-===================== */
-function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
-}
+const moeda = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const dataHoje = () => new Date().toLocaleDateString("pt-BR");
 
-function dataAtual() {
-  return new Date().toLocaleDateString("pt-BR");
-}
-
-/* =====================
-   RENDA
-===================== */
 function salvarRenda() {
-  const input = document.getElementById("inputRenda");
-  const valor = Number(input.value);
-
-  if (!valor || valor <= 0) return;
-
-  renda = valor;
-  input.value = "";
-  salvarDados();
-  atualizarTela();
+  const nome = inputRendaNome.value.trim();
+  const valor = Number(inputRendaValor.value);
+  if (!nome || valor <= 0) return;
+  rendas.push({ nome, valor, data: dataHoje() });
+  inputRendaNome.value = "";
+  inputRendaValor.value = "";
+  salvarDados(); atualizar();
 }
 
-/* =====================
-   DESPESAS
-===================== */
 function salvarDespesa() {
-  const nome = document.getElementById("inputDespesaNome").value.trim();
-  const valor = Number(document.getElementById("inputDespesaValor").value);
-
-  if (!nome || !valor || valor <= 0) return;
-
-  despesas.push({
-    nome,
-    valor,
-    data: dataAtual()
-  });
-
-  document.getElementById("inputDespesaNome").value = "";
-  document.getElementById("inputDespesaValor").value = "";
-
-  salvarDados();
-  atualizarTela();
+  const nome = inputDespesaNome.value.trim();
+  const valor = Number(inputDespesaValor.value);
+  if (!nome || valor <= 0) return;
+  despesas.push({ nome, valor, data: dataHoje() });
+  inputDespesaNome.value = "";
+  inputDespesaValor.value = "";
+  salvarDados(); atualizar();
 }
 
-/* =====================
-   RESUMO
-===================== */
-function totalDespesas() {
-  return despesas.reduce((acc, d) => acc + d.valor, 0);
-}
+const totalRendas = () => rendas.reduce((a,r)=>a+r.valor,0);
+const totalDespesas = () => despesas.reduce((a,d)=>a+d.valor,0);
 
-function saldoFinal() {
-  return renda - totalDespesas();
-}
-
-/* =====================
-   HISTÓRICO
-===================== */
-function renderHistorico() {
-  const lista = document.getElementById("historico");
-  lista.innerHTML = "";
-
-  despesas.forEach((d) => {
-    const item = document.createElement("div");
-    item.className = "historico-item";
-    item.innerHTML = `
-      <span>${d.nome}<br><small>${d.data}</small></span>
-      <strong>${formatarMoeda(d.valor)}</strong>
-    `;
-    lista.appendChild(item);
-  });
-}
-
-/* =====================
-   GRÁFICO
-===================== */
-function renderGrafico() {
-  const ctx = document.getElementById("grafico").getContext("2d");
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Renda", "Despesas"],
-      datasets: [{
-        data: [renda, totalDespesas()],
-        backgroundColor: ["#0f4c6a", "#d9534f"]
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: "bottom" }
-      }
-    }
-  });
-}
-
-/* =====================
-   PDF PROFISSIONAL (1 FOLHA)
-===================== */
-async function exportarPDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF("p", "mm", "a4");
-
-  let y = 15;
-
-  pdf.setFontSize(18);
-  pdf.text("MoneyZen CS - Relatório Financeiro", 105, y, { align: "center" });
-
-  y += 10;
-  pdf.setFontSize(11);
-  pdf.text(`Data: ${dataAtual()}`, 105, y, { align: "center" });
-
-  y += 12;
-  pdf.setFontSize(13);
-  pdf.text("Resumo", 10, y);
-
-  y += 8;
-  pdf.setFontSize(11);
-  pdf.text(`Renda: ${formatarMoeda(renda)}`, 10, y);
-  y += 6;
-  pdf.text(`Despesas: ${formatarMoeda(totalDespesas())}`, 10, y);
-  y += 6;
-  pdf.text(`Saldo: ${formatarMoeda(saldoFinal())}`, 10, y);
-
-  y += 10;
-  const canvas = document.getElementById("grafico");
-  const imgData = canvas.toDataURL("image/png");
-  pdf.addImage(imgData, "PNG", 110, 45, 80, 80);
-
-  y += 40;
-  pdf.setFontSize(13);
-  pdf.text("Histórico de Despesas", 10, y);
-
-  y += 8;
-  pdf.setFontSize(10);
-
-  despesas.forEach((d) => {
-    if (y > 270) return;
-    pdf.text(`${d.data} - ${d.nome} - ${formatarMoeda(d.valor)}`, 10, y);
-    y += 6;
-  });
-
-  pdf.setFontSize(9);
-  pdf.text("Assinatura: MoneyZen CS © C.Silva", 105, 290, { align: "center" });
-
-  pdf.save("MoneyZen-CS-Relatorio.pdf");
-}
-
-/* =====================
-   LIMPAR DADOS
-===================== */
-function limparTudo() {
-  if (!confirm("Deseja apagar todos os dados?")) return;
-  renda = 0;
-  despesas = [];
-  salvarDados();
-  atualizarTela();
-}
-
-/* =====================
-   DARK MODE
-===================== */
-function alternarTema() {
-  document.body.classList.toggle("dark");
-  localStorage.setItem(
-    "moneyzen_tema",
-    document.body.classList.contains("dark") ? "dark" : "light"
-  );
-}
-
-function carregarTema() {
-  const tema = localStorage.getItem("moneyzen_tema");
-  if (tema === "dark") document.body.classList.add("dark");
-}
-
-/* =====================
-   ATUALIZAÇÃO GERAL
-===================== */
-function atualizarTela() {
-  document.getElementById("valorRenda").innerText = formatarMoeda(renda);
-  document.getElementById("valorDespesas").innerText = formatarMoeda(totalDespesas());
-  document.getElementById("valorSaldo").innerText = formatarMoeda(saldoFinal());
-
+function atualizar() {
+  valorRenda.innerText = moeda(totalRendas());
+  valorDespesas.innerText = moeda(totalDespesas());
+  valorSaldo.innerText = moeda(totalRendas() - totalDespesas());
   renderHistorico();
   renderGrafico();
 }
 
-/* =====================
-   INIT
-===================== */
-window.onload = () => {
+function renderHistorico() {
+  historico.innerHTML = "";
+  [...rendas.map(r=>({...r,t:"Renda"})),...despesas.map(d=>({...d,t:"Despesa"}))]
+  .forEach(i=>{
+    const div=document.createElement("div");
+    div.className="historico-item";
+    div.innerHTML=`<span>${i.t}: ${i.nome}<br><small>${i.data}</small></span><strong>${moeda(i.valor)}</strong>`;
+    historico.appendChild(div);
+  });
+}
+
+function renderGrafico() {
+  if (chart) chart.destroy();
+  chart = new Chart(grafico,{
+    type:"doughnut",
+    data:{labels:["Rendas","Despesas"],datasets:[{data:[totalRendas(),totalDespesas()],backgroundColor:["#0f4c75","#d9534f"]}]},
+    options:{plugins:{legend:{position:"bottom"}}}
+  });
+}
+
+function exportarPDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
+  let y=15;
+  pdf.setFontSize(18);
+  pdf.text("MoneyZen CS - Relatório Financeiro",105,y,{align:"center"});
+  y+=10;
+  pdf.setFontSize(11);
+  pdf.text(`Rendas: ${moeda(totalRendas())}`,10,y); y+=6;
+  pdf.text(`Despesas: ${moeda(totalDespesas())}`,10,y); y+=6;
+  pdf.text(`Saldo: ${moeda(totalRendas()-totalDespesas())}`,10,y);
+  pdf.save("MoneyZen-CS-Relatorio.pdf");
+}
+
+function limparTudo() {
+  if(confirm("Apagar todos os dados?")){
+    rendas=[]; despesas=[];
+    salvarDados(); atualizar();
+  }
+}
+
+function alternarTema(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("tema",document.body.classList.contains("dark")?"dark":"light");
+}
+
+window.onload=()=>{
   carregarDados();
-  carregarTema();
-  atualizarTela();
+  if(localStorage.getItem("tema")==="dark") document.body.classList.add("dark");
+  atualizar();
 };
