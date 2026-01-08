@@ -1,225 +1,110 @@
-/* =====================================================
-MoneyZen CS - Script Oficial
-© C.Silva - Uso Proprietário
-===================================================== */
+let rendas = JSON.parse(localStorage.getItem("rendas")) || [];
+let despesas = JSON.parse(localStorage.getItem("despesas")) || [];
+let grafico;
 
-let rendas = [];
-let despesas = [];
-let chart = null;
-
-/* =====================
-LOCAL STORAGE
-===================== */
-function salvarDados() {
-localStorage.setItem("moneyzen_rendas", JSON.stringify(rendas));
-localStorage.setItem("moneyzen_despesas", JSON.stringify(despesas));
-}
-
-function carregarDados() {
-rendas = JSON.parse(localStorage.getItem("moneyzen_rendas")) || [];
-despesas = JSON.parse(localStorage.getItem("moneyzen_despesas")) || [];
-}
-
-/* =====================
-UTILIDADES
-===================== */
-function formatarMoeda(valor) {
-return valor.toLocaleString("pt-BR", {
-style: "currency",
-currency: "BRL"
-});
-}
-
-function dataAtual() {
-return new Date().toLocaleDateString("pt-BR");
-}
-
-/* =====================
-RENDA (MÚLTIPLA)
-===================== */
 function salvarRenda() {
-const input = document.getElementById("inputRenda");
-const valor = Number(input.value);
+  const nome = inputRendaNome.value.trim();
+  const valor = parseFloat(inputRendaValor.value);
 
-if (!valor || valor <= 0) return;
+  if (!nome || valor <= 0) return alert("Preencha a renda corretamente");
 
-rendas.push({
-valor,
-data: dataAtual()
-});
+  rendas.push({ nome, valor, data: new Date().toLocaleDateString() });
+  localStorage.setItem("rendas", JSON.stringify(rendas));
 
-input.value = "";
-salvarDados();
-atualizarTela();
+  inputRendaNome.value = "";
+  inputRendaValor.value = "";
+
+  atualizarTudo();
 }
 
-function totalRendas() {
-return rendas.reduce((acc, r) => acc + r.valor, 0);
-}
-
-/* =====================
-DESPESAS
-===================== */
 function salvarDespesa() {
-const nome = document.getElementById("inputDespesaNome").value.trim();
-const valor = Number(document.getElementById("inputDespesaValor").value);
+  const nome = inputDespesaNome.value.trim();
+  const valor = parseFloat(inputDespesaValor.value);
 
-if (!nome || !valor || valor <= 0) return;
+  if (!nome || valor <= 0) return alert("Preencha a despesa corretamente");
 
-despesas.push({
-nome,
-valor,
-data: dataAtual()
-});
+  despesas.push({ nome, valor, data: new Date().toLocaleDateString() });
+  localStorage.setItem("despesas", JSON.stringify(despesas));
 
-document.getElementById("inputDespesaNome").value = "";
-document.getElementById("inputDespesaValor").value = "";
+  inputDespesaNome.value = "";
+  inputDespesaValor.value = "";
 
-salvarDados();
-atualizarTela();
+  atualizarTudo();
 }
 
-function totalDespesas() {
-return despesas.reduce((acc, d) => acc + d.valor, 0);
+function atualizarTudo() {
+  const totalRenda = rendas.reduce((s, r) => s + r.valor, 0);
+  const totalDespesa = despesas.reduce((s, d) => s + d.valor, 0);
+  const saldo = totalRenda - totalDespesa;
+
+  valorRenda.textContent = totalRenda.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  valorDespesas.textContent = totalDespesa.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  valorSaldo.textContent = saldo.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  renderHistorico();
+  renderGrafico(totalRenda, totalDespesa);
 }
 
-function saldoFinal() {
-return totalRendas() - totalDespesas();
-}
-
-/* =====================
-HISTÓRICO
-===================== */
 function renderHistorico() {
-const lista = document.getElementById("historico");
-lista.innerHTML = "";
+  historico.innerHTML = "";
 
-despesas.forEach((d) => {
-const item = document.createElement("div");
-item.className = "historico-item";
-item.innerHTML = `<span>${d.nome}<br><small>${d.data}</small></span><strong>${formatarMoeda(d.valor)}</strong>`;
-lista.appendChild(item);
-});
+  despesas.forEach(d => {
+    const div = document.createElement("div");
+    div.className = "historico-item";
+    div.innerHTML = `<strong>${d.nome}</strong><br>R$ ${d.valor.toFixed(2)} — ${d.data}`;
+    historico.appendChild(div);
+  });
 }
 
-/* =====================
-GRÁFICO
-===================== */
-function renderGrafico() {
-const ctx = document.getElementById("grafico").getContext("2d");
+function renderGrafico(renda, despesa) {
+  if (grafico) grafico.destroy();
 
-if (chart) chart.destroy();
-
-chart = new Chart(ctx, {
-type: "doughnut",
-data: {
-labels: ["Renda", "Despesas"],
-datasets: [{
-data: [totalRendas(), totalDespesas()],
-backgroundColor: ["#0f4c6a", "#d9534f"]
-}]
-},
-options: {
-responsive: true,
-plugins: {
-legend: { position: "bottom" }
-}
-}
-});
+  grafico = new Chart(document.getElementById("grafico"), {
+    type: "doughnut",
+    data: {
+      labels: ["Renda", "Despesas"],
+      datasets: [{
+        data: [renda, despesa]
+      }]
+    }
+  });
 }
 
-/* =====================
-PDF
-===================== */
-async function exportarPDF() {
-const { jsPDF } = window.jspdf;
-const pdf = new jsPDF("p", "mm", "a4");
+function exportarPDF() {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
 
-let y = 15;
+  pdf.text("MoneyZen CS - Relatório Financeiro", 10, 10);
 
-pdf.setFontSize(18);
-pdf.text("MoneyZen CS - Relatório Financeiro", 105, y, { align: "center" });
+  pdf.text(`Renda: ${valorRenda.textContent}`, 10, 25);
+  pdf.text(`Despesas: ${valorDespesas.textContent}`, 10, 35);
+  pdf.text(`Saldo: ${valorSaldo.textContent}`, 10, 45);
 
-y += 10;
-pdf.setFontSize(11);
-pdf.text(`Data: ${dataAtual()}`, 105, y, { align: "center" });
+  let y = 60;
+  pdf.text("Histórico de Despesas:", 10, y);
+  y += 10;
 
-y += 12;
-pdf.setFontSize(13);
-pdf.text("Resumo", 10, y);
+  despesas.forEach(d => {
+    pdf.text(`${d.nome} - R$ ${d.valor.toFixed(2)} (${d.data})`, 10, y);
+    y += 8;
+  });
 
-y += 8;
-pdf.setFontSize(11);
-pdf.text(`Renda: ${formatarMoeda(totalRendas())}`, 10, y);
-y += 6;
-pdf.text(`Despesas: ${formatarMoeda(totalDespesas())}`, 10, y);
-y += 6;
-pdf.text(`Saldo: ${formatarMoeda(saldoFinal())}`, 10, y);
+  pdf.text("Assinatura: MoneyZen CS © C.Silva", 10, 280);
 
-y += 10;
-const canvas = document.getElementById("grafico");
-const imgData = canvas.toDataURL("image/png");
-pdf.addImage(imgData, "PNG", 110, 45, 80, 80);
-
-y += 40;
-pdf.setFontSize(13);
-pdf.text("Histórico de Despesas", 10, y);
-
-y += 8;
-pdf.setFontSize(10);
-
-despesas.forEach((d) => {
-if (y > 270) return;
-pdf.text(`${d.data} - ${d.nome} - ${formatarMoeda(d.valor)}`, 10, y);
-y += 6;
-});
-
-pdf.save("MoneyZen-CS-Relatorio.pdf");
+  pdf.save("MoneyZen-CS.pdf");
 }
 
-/* =====================
-LIMPAR
-===================== */
-function limparTudo() {
-if (!confirm("Deseja apagar todos os dados?")) return;
-rendas = [];
-despesas = [];
-salvarDados();
-atualizarTela();
-}
-
-/* =====================
-TEMA
-===================== */
 function alternarTema() {
-document.body.classList.toggle("dark");
-localStorage.setItem(
-"moneyzen_tema",
-document.body.classList.contains("dark") ? "dark" : "light"
-);
+  document.body.classList.toggle("dark");
 }
 
-function carregarTema() {
-const tema = localStorage.getItem("moneyzen_tema");
-if (tema === "dark") document.body.classList.add("dark");
+function limparTudo() {
+  if (confirm("Deseja apagar todos os dados?")) {
+    localStorage.clear();
+    rendas = [];
+    despesas = [];
+    atualizarTudo();
+  }
 }
 
-/* =====================
-ATUALIZAÇÃO
-===================== */
-function atualizarTela() {
-document.getElementById("valorRenda").innerText = formatarMoeda(totalRendas());
-document.getElementById("valorDespesas").innerText = formatarMoeda(totalDespesas());
-document.getElementById("valorSaldo").innerText = formatarMoeda(saldoFinal());
-renderHistorico();
-renderGrafico();
-}
-
-/* =====================
-INIT
-===================== */
-window.onload = () => {
-carregarDados();
-carregarTema();
-atualizarTela();
-};
+atualizarTudo();
