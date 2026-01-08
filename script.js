@@ -1,7 +1,23 @@
 // ===============================
-// MoneyZen CS - Script Principal
+// MoneyZen CS - Script Oficial
 // Autor: C. Silva
 // ===============================
+
+// ---------- ELEMENTOS ----------
+const rendaForm = document.getElementById("renda-form");
+const despesaForm = document.getElementById("despesa-form");
+
+const rendaDescricao = document.getElementById("renda-descricao");
+const rendaValor = document.getElementById("renda-valor");
+
+const despesaDescricao = document.getElementById("despesa-descricao");
+const despesaValor = document.getElementById("despesa-valor");
+
+const totalRendaEl = document.getElementById("total-renda");
+const totalDespesaEl = document.getElementById("total-despesa");
+const saldoEl = document.getElementById("saldo");
+
+const listaDespesas = document.getElementById("lista-despesas");
 
 // ---------- ESTADO ----------
 let rendas = JSON.parse(localStorage.getItem("rendas")) || [];
@@ -33,71 +49,101 @@ function totalDespesas() {
   return despesas.reduce((t, d) => t + d.valor, 0);
 }
 
-function saldoFinal() {
-  return totalRendas() - totalDespesas();
+function atualizarResumo() {
+  totalRendaEl.textContent = formatarMoeda(totalRendas());
+  totalDespesaEl.textContent = formatarMoeda(totalDespesas());
+  saldoEl.textContent = formatarMoeda(totalRendas() - totalDespesas());
 }
+
+// ---------- RENDER ----------
+function renderDespesas() {
+  listaDespesas.innerHTML = "";
+  despesas
+    .slice()
+    .reverse()
+    .forEach((d) => {
+      const li = document.createElement("li");
+      li.textContent = `${d.data} - ${d.descricao} - ${formatarMoeda(
+        d.valor
+      )}`;
+      listaDespesas.appendChild(li);
+    });
+}
+
+// ---------- EVENTOS ----------
+rendaForm.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const descricao = rendaDescricao.value.trim();
+  const valor = parseFloat(rendaValor.value);
+
+  if (!descricao || valor <= 0) return;
+
+  rendas.push({
+    descricao,
+    valor,
+    data: hoje(),
+  });
+
+  salvarDados();
+  atualizarResumo();
+
+  rendaDescricao.value = "";
+  rendaValor.value = "";
+});
+
+despesaForm.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const descricao = despesaDescricao.value.trim();
+  const valor = parseFloat(despesaValor.value);
+
+  if (!descricao || valor <= 0) return;
+
+  despesas.push({
+    descricao,
+    valor,
+    data: hoje(),
+  });
+
+  salvarDados();
+  atualizarResumo();
+  renderDespesas();
+
+  despesaDescricao.value = "";
+  despesaValor.value = "";
+});
 
 // ---------- PDF PROFISSIONAL ----------
 function gerarPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
+  const doc = new jsPDF();
 
-  // CORES
-  const azul = [26, 115, 232];
-  const cinza = [120, 120, 120];
-
-  // HEADER
-  doc.setFillColor(...azul);
-  doc.rect(0, 0, 210, 25, "F");
-
-  doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
-  doc.text("MoneyZen CS – Relatório Financeiro", 14, 16);
-
+  doc.text("MoneyZen CS - Relatório Financeiro", 14, 20);
   doc.setFontSize(10);
-  doc.text(`Data: ${hoje()}`, 160, 16);
+  doc.text(`Data: ${hoje()}`, 14, 28);
 
-  // RESUMO
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(13);
-  doc.text("Resumo Financeiro", 14, 35);
+  doc.setFontSize(12);
+  doc.text("Resumo", 14, 40);
+  doc.setFontSize(10);
 
-  doc.setFontSize(11);
-  doc.text(`Renda Total: ${formatarMoeda(totalRendas())}`, 14, 45);
-  doc.text(`Despesas Totais: ${formatarMoeda(totalDespesas())}`, 14, 52);
-  doc.text(`Saldo Final: ${formatarMoeda(saldoFinal())}`, 14, 59);
+  doc.text(`Renda: ${formatarMoeda(totalRendas())}`, 14, 48);
+  doc.text(`Despesas: ${formatarMoeda(totalDespesas())}`, 14, 55);
+  doc.text(
+    `Saldo: ${formatarMoeda(totalRendas() - totalDespesas())}`,
+    14,
+    62
+  );
 
-  // GRÁFICO (SIMPLIFICADO)
-  doc.setDrawColor(...azul);
-  doc.setFillColor(230, 240, 255);
-
-  const baseX = 120;
-  const baseY = 65;
-
-  const rendaBar = Math.min(totalRendas() / 50, 50);
-  const despesaBar = Math.min(totalDespesas() / 50, 50);
-
-  doc.text("Gráfico", baseX, baseY - 8);
-  doc.rect(baseX, baseY, 15, -rendaBar, "F");
-  doc.rect(baseX + 25, baseY, 15, -despesaBar, "F");
-
-  doc.setFontSize(9);
-  doc.text("Renda", baseX, baseY + 5);
-  doc.text("Despesa", baseX + 22, baseY + 5);
-
-  // HISTÓRICO DE DESPESAS
-  let y = 85;
-  doc.setFontSize(13);
+  let y = 75;
+  doc.setFontSize(12);
   doc.text("Histórico de Despesas", 14, y);
 
   y += 8;
   doc.setFontSize(10);
 
   despesas.forEach((d) => {
-    if (y > 270) {
-      doc.addPage();
-      y = 20;
-    }
     doc.text(
       `${d.data} - ${d.descricao} - ${formatarMoeda(d.valor)}`,
       14,
@@ -106,25 +152,16 @@ function gerarPDF() {
     y += 6;
   });
 
-  // RODAPÉ
   doc.setFontSize(9);
-  doc.setTextColor(...cinza);
   doc.text(
-    "Assinatura: MoneyZen CS • Desenvolvido por C. Silva",
+    "Assinatura: MoneyZen CS • C. Silva",
     14,
     290
   );
 
-  doc.save("MoneyZen-CS-Relatorio-Financeiro.pdf");
+  doc.save("MoneyZen-CS-Relatorio.pdf");
 }
 
-// ---------- EXEMPLO DE INSERÇÃO ----------
-function adicionarRenda(descricao, valor) {
-  rendas.push({ descricao, valor, data: hoje() });
-  salvarDados();
-}
-
-function adicionarDespesa(descricao, valor) {
-  despesas.push({ descricao, valor, data: hoje() });
-  salvarDados();
-}
+// ---------- INIT ----------
+atualizarResumo();
+renderDespesas();
