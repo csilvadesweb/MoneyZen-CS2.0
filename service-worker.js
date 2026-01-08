@@ -1,52 +1,39 @@
-const CACHE_NAME = "moneyzen-cache-v1";
-const ASSETS = [
-  "./index.html",
-  "./style.css",
-  "./script.js",
-  "./manifest.json",
-  "./privacy.html",
-  "./icons/icon-72.png",
-  "./icons/icon-96.png",
-  "./icons/icon-128.png",
-  "./icons/icon-144.png",
-  "./icons/icon-152.png",
-  "./icons/icon-172.png",
-  "./icons/icon-192.png",
-  "./icons/icon-384.png",
-  "./icons/icon-512.png"
+const CACHE = "moneyzen-v1";
+
+const FILES = [
+  "/MoneyZen-CS2.0/",
+  "/MoneyZen-CS2.0/index.html",
+  "/MoneyZen-CS2.0/style.css",
+  "/MoneyZen-CS2.0/script.js",
+  "/MoneyZen-CS2.0/manifest.json",
+  "/MoneyZen-CS2.0/privacy.html",
+  "/MoneyZen-CS2.0/icons/icon-72.png",
+  "/MoneyZen-CS2.0/icons/icon-96.png",
+  "/MoneyZen-CS2.0/icons/icon-128.png",
+  "/MoneyZen-CS2.0/icons/icon-144.png",
+  "/MoneyZen-CS2.0/icons/icon-152.png",
+  "/MoneyZen-CS2.0/icons/icon-172.png",
+  "/MoneyZen-CS2.0/icons/icon-192.png",
+  "/MoneyZen-CS2.0/icons/icon-384.png",
+  "/MoneyZen-CS2.0/icons/icon-512.png"
 ];
 
-// INSTALAÇÃO: CACHE DOS ARQUIVOS
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener("install", e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)));
+  self.skipWaiting();
 });
 
-// ATIVAÇÃO: LIMPAR CACHES ANTIGOS
-self.addEventListener("activate", event => {
-  event.waitUntil(
+self.addEventListener("activate", e => {
+  e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      )
+      Promise.all(keys.map(k => k !== CACHE && caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
-// FETCH: SERVIR CACHE OU REDE
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(cached => cached || fetch(event.request))
-      .catch(() => {
-        // Fallback se offline e arquivo não estiver em cache
-        if (event.request.destination === "document") return caches.match("./index.html");
-      })
+self.addEventListener("fetch", e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request))
   );
 });
