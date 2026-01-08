@@ -1,28 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>MoneyZen CS</title>
+<meta charset="UTF-8" />
+<title>MoneyZen CS</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <meta name="theme-color" content="#0b2c3d" />
-  <meta name="description" content="MoneyZen CS - Controle financeiro inteligente, simples e profissional." />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="theme-color" content="#0b2c3d" />
+<meta name="description" content="MoneyZen CS - Controle financeiro inteligente, simples e profissional." />
 
-  <!-- MANIFEST (CAMINHO ABSOLUTO - GITHUB PAGES) -->
-  <link rel="manifest" href="/MoneyZen-CS2.0/manifest.json" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="stylesheet" href="./style.css" />
 
-  <!-- ESTILO -->
-  <link rel="stylesheet" href="/MoneyZen-CS2.0/style.css" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="MoneyZen CS" />
+<link rel="apple-touch-icon" href="./icons/icon-192.png" />
 
-  <!-- iOS -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="MoneyZen CS" />
-  <link rel="apple-touch-icon" href="/MoneyZen-CS2.0/icons/icon-192.png" />
-
-  <!-- LIBS -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -33,76 +28,61 @@
 
 <main class="app-container">
 
-  <section class="card resumo">
-    <div class="resumo-item">
-      <h3>Renda</h3>
-      <p id="valorRenda">R$ 0,00</p>
-    </div>
-    <div class="resumo-item">
-      <h3>Despesas</h3>
-      <p id="valorDespesas">R$ 0,00</p>
-    </div>
-    <div class="resumo-item">
-      <h3>Saldo</h3>
-      <p id="valorSaldo">R$ 0,00</p>
-    </div>
-  </section>
+<section class="card resumo">
+  <div class="resumo-item">
+    <h3>Rendas</h3>
+    <p id="valorRenda">R$ 0,00</p>
+  </div>
+  <div class="resumo-item">
+    <h3>Despesas</h3>
+    <p id="valorDespesas">R$ 0,00</p>
+  </div>
+  <div class="resumo-item">
+    <h3>Saldo</h3>
+    <p id="valorSaldo">R$ 0,00</p>
+  </div>
+</section>
 
-  <section class="card">
-    <h2>Adicionar Renda</h2>
-    <input id="inputRenda" type="number" placeholder="Valor da renda" />
-    <button onclick="salvarRenda()">Salvar Renda</button>
-  </section>
+<section class="card">
+  <h2>Adicionar Renda</h2>
+  <input id="inputRendaNome" placeholder="Fonte da renda" />
+  <input id="inputRendaValor" type="number" placeholder="Valor" />
+  <button onclick="salvarRenda()">Salvar Renda</button>
+</section>
 
-  <section class="card">
-    <h2>Adicionar Despesa</h2>
-    <input id="inputDespesaNome" type="text" placeholder="Nome da despesa" />
-    <input id="inputDespesaValor" type="number" placeholder="Valor da despesa" />
-    <button onclick="salvarDespesa()">Salvar Despesa</button>
-  </section>
+<section class="card">
+  <h2>Adicionar Despesa</h2>
+  <input id="inputDespesaNome" placeholder="Nome da despesa" />
+  <input id="inputDespesaValor" type="number" placeholder="Valor" />
+  <button onclick="salvarDespesa()">Salvar Despesa</button>
+</section>
 
-  <section class="card">
-    <h2>Gráfico</h2>
-    <canvas id="grafico"></canvas>
-  </section>
+<section class="card">
+  <h2>Gráfico</h2>
+  <canvas id="grafico" height="220"></canvas>
+</section>
 
-  <section class="card">
-    <h2>Histórico</h2>
-    <div id="historico"></div>
-  </section>
+<section class="card">
+  <h2>Histórico</h2>
+  <div id="historico"></div>
+</section>
 
-  <section class="card">
-    <button onclick="exportarPDF()">Exportar PDF</button>
-    <button onclick="limparTudo()">Limpar Dados</button>
-    <button onclick="alternarTema()">Claro / Escuro</button>
-    <button id="btnInstall" style="display:none;">📲 Instalar App</button>
-  </section>
+<section class="card">
+  <button onclick="exportarPDF()">Exportar PDF Profissional</button>
+  <button onclick="limparTudo()">Limpar Dados</button>
+  <button onclick="alternarTema()">Claro / Escuro</button>
+</section>
 
 </main>
 
-<script src="/MoneyZen-CS2.0/script.js"></script>
+<script src="./script.js"></script>
 
 <script>
-let deferredPrompt;
-
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/MoneyZen-CS2.0/service-worker.js");
+    navigator.serviceWorker.register("./service-worker.js");
   });
 }
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById("btnInstall").style.display = "block";
-});
-
-document.getElementById("btnInstall").addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt = null;
-  document.getElementById("btnInstall").style.display = "none";
-});
 </script>
 
 </body>
